@@ -22,4 +22,23 @@ Set2.pcap
 ---------
 
 10. Total number of packets: 74566
-11. 
+11. 1,2,3,4,5,6,7
+12. In wireshark, I did a string search for "pass" and enumerated
+    through all the packets that matched the search. In some cases the
+user/pass combos were in the details, and in other cases I follwed the
+tcp stream for more info.
+13. The protocols on which usernames/passwords were found are POP and
+    TELNET
+14. 3 out of the 5 username/password combinations were succesful.
+15. I verified the username/password combinations by following the tcp
+    stream and checking to see if the server returned unauthorized or
+not.
+16. We do not have permission to break into the servers in question, and
+    therefore any unauthorized access is unethical and potentially
+illegal.
+17. Use a VPN, do not use unencrypted protocols, and NEVER use the
+    defcon wifi. Also, now that these accounts are compromised change
+the password of any account that shares a password with the one
+compromised.
+18. 
+
