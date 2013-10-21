@@ -10,9 +10,9 @@ def ids(iface)
   attack_type[0] = "Null Scan"
   attack_type[18] =  "TCP-Connect Scan"
   attack_type[41] = "XMAS Scan"
+  attack_type["cc"] = "Credit card number leaked in the clear from "
   #String->bytes and regex for credit cards and xss.
-  xss = "<script>alert('XSS');</script>"
-  xss_bin = xss.each_byte.map { |b| sprintf(" 0x%02X ",b) }.join
+  xss = Regexp.new(/<script>\s*(alert|window.location)/)
   visa = Regexp.new(/4\d{3}(\s|-)?\d{4}(\s|-)?\d{4}(\s|-)?\d{4}/)
   mastercard = Regexp.new(/5\d{3}(\s|-)?\d{4}(\s|-)?\d{4}(\s|-)?\d{4}/)
   discovercard = Regexp.new(/6011(\s|-)?\d{4}(\s|-)?\d{4}(\s|-)?\d{4}/)
@@ -27,17 +27,27 @@ def ids(iface)
       if tcp_flags==41 || tcp_flags==0 || tcp_flags==18
         puts "#{incident_num}. ALERT: #{attack_type[tcp_flags]} is detected from #{pkt.ip_saddr}"
         incident_num = incident_num + 1
-      else
-        puts pkt.payload
       end
-      #next if pkt.ip_header.ip_saddr == Utils.ifconfig(iface)[:ip_saddr]
-      #packet_info = [pkt.ip_saddr, pkt.ip_daddr, pkt.size, pkt.proto.last]
-      #puts "%-15s -> %-15s %-4d %s" % packet_info
-    else
-      pkt.payload.scan(visa)
-      pkt.payload.scan(mastercard)
-      pkt.payload.scan(discovercard)
-      pkt.payload.scan(amex)
+      if pkt.payload.scan(xss)
+        puts "#{incident_num}. ALERT: XSS attack is detected from #{pkt.ip_saddr}"
+        incident_num = incident_num + 1
+      end
+      if pkt.payload.scan(visa)
+        puts "#{incident_num}. ALERT: #{attack_type["cc"]} #{pkt.ip_saddr}"
+        incident_num = incident_num + 1
+      end
+      if pkt.payload.scan(mastercard)
+        puts "#{incident_num}. ALERT: #{attack_type["cc"]} #{pkt.ip_saddr}"
+        incident_num = incident_num + 1
+      end
+      if pkt.payload.scan(discovercard)
+        puts "#{incident_num}. ALERT: #{attack_type["cc"]} #{pkt.ip_saddr}"
+        incident_num = incident_num + 1
+      end
+      if pkt.payload.scan(amex)
+        puts "#{incident_num}. ALERT: #{attack_type["cc"]} #{pkt.ip_saddr}"
+        incident_num = incident_num + 1
+      end
     end
   end
 end
