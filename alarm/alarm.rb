@@ -6,7 +6,10 @@ include PacketFu
 def ids(iface)
 
   incident_num = 1
-  attack_type = [0, "Null Scan", 18, "TCP-Connect Scan", 41, "XMAS Scan"]
+  attack_type = Hash.new
+  attack_type[0] = "Null Scan"
+  attack_type[18] =  "TCP-Connect Scan"
+  attack_type[41] = "XMAS Scan"
   #String->bytes and regex for credit cards and xss.
   xss = "<script>alert('XSS');</script>"
   xss_bin = xss.each_byte.map { |b| sprintf(" 0x%02X ",b) }.join
@@ -20,10 +23,12 @@ def ids(iface)
   capture.stream.each do |p|
     pkt = Packet.parse p
     if pkt.is_tcp?
-      tcp_flags = pkt.tcp_flags
+      tcp_flags = pkt.tcp_flags.to_i
       if tcp_flags==41 || tcp_flags==0 || tcp_flags==18
-        put_s "#{incident_num}. ALERT: #{attack_type[tcp_flags]} is detected from #{pkt.ip_saddr}"
+        puts "#{incident_num}. ALERT: #{attack_type[tcp_flags]} is detected from #{pkt.ip_saddr}"
         incident_num = incident_num + 1
+      else
+        puts pkt.payload
       end
       #next if pkt.ip_header.ip_saddr == Utils.ifconfig(iface)[:ip_saddr]
       #packet_info = [pkt.ip_saddr, pkt.ip_daddr, pkt.size, pkt.proto.last]
