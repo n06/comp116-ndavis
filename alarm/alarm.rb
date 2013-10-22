@@ -28,14 +28,14 @@ def ids(iface)
         puts "#{incident_num}. ALERT: #{attack_type[tcp_flags]} is detected from #{pkt.ip_saddr}"
         incident_num = incident_num + 1
       end
-      if pkt.payload.scan(xss)
+      pkt.payload.scan(xss) {|match|
         puts "#{incident_num}. ALERT: XSS attack is detected from #{pkt.ip_saddr}"
         incident_num = incident_num + 1
-      end
-      if pkt.payload.scan(visa)
+      }
+      pkt.payload.scan(visa) {|match|
         puts "#{incident_num}. ALERT: #{attack_type["cc"]} #{pkt.ip_saddr}"
         incident_num = incident_num + 1
-      end
+      }
       if pkt.payload.scan(mastercard)
         puts "#{incident_num}. ALERT: #{attack_type["cc"]} #{pkt.ip_saddr}"
         incident_num = incident_num + 1
